@@ -1,8 +1,9 @@
 import numpy as np
 import matplotlib.pyplot as plt
-from time import time
+from time import time, sleep
 import psutil
 from multiprocessing import Pool, cpu_count
+import threading
 import matplotlib
 import sys
 
@@ -17,6 +18,18 @@ WIDTH = 1000
 HEIGHT = 800
 MAX_ITER = 1000
 C = complex(-0.7, 0.27015)
+
+# Lista para almacenar el uso de los núcleos a lo largo del tiempo
+cpu_usage_history = []
+
+def monitor_cpu_usage():
+    """Función en un hilo separado para monitorear el uso de CPU."""
+    while monitor_running:
+        usage = psutil.cpu_percent(interval=0.5, percpu=True)
+        cpu_usage_history.append(usage)
+        # Imprimir el uso de CPU de cada núcleo
+        print(f"Uso de CPU por núcleo: {usage}")
+        sleep(0.5)
 
 def julia_recursive(z, c, max_iter, current_iter=0):
     """Calcula recursivamente el número de iteraciones para un punto del conjunto de Julia."""
@@ -40,7 +53,9 @@ def compute_row(y):
     return row
 
 def generate_julia_parallel():
-    with Pool(processes=cpu_count()) as pool:
+    # Utiliza todos los núcleos disponibles para calcular el fractal
+    num_cores = cpu_count()
+    with Pool(processes=num_cores) as pool:
         image = pool.map(compute_row, range(HEIGHT))
     return np.array(image)
 
@@ -53,17 +68,25 @@ if __name__ == "__main__":
     # Medir recursos antes de ejecutar el programa
     mem_usage_before = process.memory_info().rss / (1024 ** 2)
 
+    # Configurar y lanzar el hilo de monitoreo de CPU
+    monitor_running = True
+    monitor_thread = threading.Thread(target=monitor_cpu_usage)
+    monitor_thread.start()
+
+    # Generar el fractal
     start_time = time()
     image = generate_julia_parallel()
     end_time = time()
 
+    # Detener el monitoreo
+    monitor_running = False
+    monitor_thread.join()
+
     # Medir recursos después de ejecutar el programa
-    cpu_usage_after = process.cpu_percent(interval=0.1)
     mem_usage_after = process.memory_info().rss / (1024 ** 2)
 
     # Mostrar resultados
     print(f"Tiempo de ejecución: {end_time - start_time:.2f} segundos")
-    print(f"Uso de CPU del proceso: {cpu_usage_after:.2f}%")
     print(f"Uso de memoria antes: {mem_usage_before:.2f} MB")
     print(f"Uso de memoria después: {mem_usage_after:.2f} MB")
 
@@ -72,6 +95,14 @@ if __name__ == "__main__":
 
     # Generar la imagen con colores ajustados
     plt.imshow(image, cmap="plasma", extent=[-2, 2, -2, 2])
-    plt.colorbar()
+    plt.colorbar(label='Número de iteraciones')
+    plt.title('Fractal de Julia con mapa de colores "plasma"')
+    plt.xlabel('Parte Real')
+    plt.ylabel('Parte Imaginaria')
+
+    # Añadir una anotación sobre el mapa de colores
+    plt.annotate('Mapa de colores usado: plasma', xy=(-1.8, 1.8), color='white', fontsize=10,
+                 bbox=dict(facecolor='black', alpha=0.5))
+
     plt.savefig("julia_fractal_parallel_recursive_safe.png", dpi=300)
     print("Imagen guardada como 'julia_fractal_parallel_recursive_safe.png'")
