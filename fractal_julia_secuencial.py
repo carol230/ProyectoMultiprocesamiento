@@ -80,7 +80,6 @@ if __name__ == "__main__":
 
     # Mostrar resultados
     print(f"Tiempo de ejecución: {end_time - start_time:.2f} segundos")
-    print(f"Uso de CPU del proceso: {cpu_usage_after:.2f}%")
     print(f"Uso de memoria antes: {mem_usage_before:.2f} MB")
     print(f"Uso de memoria después: {mem_usage_after:.2f} MB")
 
