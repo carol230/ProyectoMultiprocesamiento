@@ -11,8 +11,8 @@ matplotlib.use('Agg')
 sys.setrecursionlimit(2000)
 
 # Parámetros de la imagen
-WIDTH = 1000
-HEIGHT = 800
+WIDTH = 1280
+HEIGHT = 720
 MAX_ITER = 1000
 C = complex(-0.7, 0.27015)  # Número complejo fijo para el conjunto de Julia
 

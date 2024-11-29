@@ -14,8 +14,8 @@ matplotlib.use('Agg')
 sys.setrecursionlimit(2000)
 
 # Parámetros de la imagen
-WIDTH = 1000
-HEIGHT = 800
+WIDTH = 1280
+HEIGHT = 720
 MAX_ITER = 1000
 C = complex(-0.7, 0.27015)
 
@@ -95,14 +95,8 @@ if __name__ == "__main__":
 
     # Generar la imagen con colores ajustados
     plt.imshow(image, cmap="plasma", extent=[-2, 2, -2, 2])
-    plt.colorbar(label='Número de iteraciones')
-    plt.title('Fractal de Julia con mapa de colores "plasma"')
-    plt.xlabel('Parte Real')
-    plt.ylabel('Parte Imaginaria')
+    plt.colorbar()
 
-    # Añadir una anotación sobre el mapa de colores
-    plt.annotate('Mapa de colores usado: plasma', xy=(-1.8, 1.8), color='white', fontsize=10,
-                 bbox=dict(facecolor='black', alpha=0.5))
 
     plt.savefig("julia_fractal_parallel_recursive_safe.png", dpi=300)
     print("Imagen guardada como 'julia_fractal_parallel_recursive_safe.png'")
